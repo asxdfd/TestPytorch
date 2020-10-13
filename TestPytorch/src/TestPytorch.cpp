@@ -75,7 +75,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> decode(at::Tensor& loc, at::Tenso
     std::vector<std::vector<int>> density = { {-3, -1, 1, 3},{-1, 1},{0} };
 
     int num_layers = sizeof(feature_map_sizes) / sizeof(int);
-    std::vector<std::vector<float>> boxes;
+    std::vector<at::Tensor> boxes;
     for (int i = 0; i < num_layers; i++)
     {
         int fmsize = feature_map_sizes[i];
@@ -100,7 +100,7 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> decode(at::Tensor& loc, at::Tenso
                                 box.push_back(cy + dy / 8.0 * s * ar);
                                 box.push_back(s * ar);
                                 box.push_back(s * ar);
-                                boxes.push_back(box);
+                                boxes.push_back(torch::tensor(box, torch::kFloat));
                             }
                     else
                     {
@@ -109,17 +109,13 @@ std::tuple<at::Tensor, at::Tensor, at::Tensor> decode(at::Tensor& loc, at::Tenso
                         box.push_back(cy);
                         box.push_back(s * ar);
                         box.push_back(s * ar);
-                        boxes.push_back(box);
+                        boxes.push_back(torch::tensor(box, torch::kFloat));
                     }
                 }
             }
     }
-    at::Tensor default_boxes = torch::empty(boxes.size() * 4);
-    float* data = default_boxes.data<float>();
-    for (auto& box : boxes)
-        for (float f : box)
-            *data++ = f;
-    default_boxes.resize_({ (long long)boxes.size(), 4 });
+    at::Tensor default_boxes = torch::stack(boxes);
+    std::cout << default_boxes.sizes() << std::endl;
 
     float variances[] = { 0.1, 0.2 };
 
@@ -184,6 +180,5 @@ at::Tensor nms(at::Tensor& bboxes, at::Tensor& scores, float threshold = 0.5)
         order = order.index({ ids + 1 });
     }
 
-    std::cout << torch::stack(keep).to(torch::kLong) << std::endl;
     return torch::stack(keep).to(torch::kLong);
 }
