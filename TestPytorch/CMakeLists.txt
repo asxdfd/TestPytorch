@@ -13,7 +13,7 @@ include_directories("${OPENCV_PREFIX_PATH}/include")
 link_directories("${OPENCV_PREFIX_PATH}/x64/vc16/lib")
 
 # Add source to this project's executable.
-add_executable (TestPytorch "src/TestPytorch.cpp")
+add_executable (TestPytorch "src/TestPytorch.cpp" "src/Figure.cpp" "src/FaceDetector.cpp" "src/KeypointsDetector.cpp")
 
 # TODO: Add tests and install targets if needed.
 target_link_libraries(TestPytorch
