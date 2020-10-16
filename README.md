@@ -37,34 +37,36 @@
   ```
 3. 人脸识别
   ```
-  face.predict(input, output);
-  
-  /**
-  * 识别图片中的人脸
-  * @param path - 输入图片的路径
-  * @param outpath - 输出图片的路径
-  *                - default ""
-  *
-  * @return 人脸框的vector
-  **/
-  std::vector<std::vector<float>> predict(std::string path, std::string outpath);
-  
-  /**
-  * 识别图片中的人脸
-  * @param img - 输入的图片Mat
-  * @param outpath - 输出图片的路径
-  *                - default ""
-  *
-  * @return 人脸框的vector
-  **/
-  std::vector<std::vector<float>> predict(std::string path, std::string outpath); 
+  cv::Mat img = cv::imread(img_path);
+  // output - output image file path, default ""
+  std::vector<std::vector<float> faceboxes = face.predict(img, output);
   ```
-4. 关键点识别
+4. 创建KeypointsDetector实例
+  ```
+  KeypointsDetector keypoints(model_path);
+  ```
+5. 关键点识别
+  ```
+  // output - output image file path, default ""
+  std::vector<Figure> figures = keypoints.predict(img, faceboxes, output);
+  ```
+6. 显示结果
+  ```
+  for (Figure figure : figures) {
+      std::vector<cv::Point> landmarks = figure.getLandmarks();
+      // 自定义绘制人脸特征点函数, 可绘制人脸特征点形状/轮廓
+      // drawLandmarks(frame, landmarks[i]);
+      // OpenCV自带绘制人脸关键点函数: drawFacemarks
+      cv::face::drawFacemarks(img, landmarks, cv::Scalar(0, 0, 255));
+  }
+  // Display the resulting frame
+  cv::imshow("Frame", img);
+  ```
 
 #### 实体类
 - Figure：存放图片中的关键点和头部姿态信息
 - FaceDetector：人脸检测器
-- （未完成）KeypointsDetector：关键点识别器
+- （未完成）KeypointsDetector：关键点检测器
 
 ## TODOS
 - [x] 使用Pytorch完成人脸识别
